@@ -9,6 +9,13 @@ htmlcov/
 dist/
 build/
 
+# Segredos e variáveis locais — NUNCA comitar no Git
+.env
+*.env
+!*.env.example
+*.key
+*.pem
+
 # Terraform
 **/.terraform/*
 *.tfstate
