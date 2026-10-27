@@ -46,6 +46,11 @@ securityContext:
     drop:
       - ALL
 
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
 podSecurityContext:
   fsGroup: 10001
 

@@ -20,6 +20,7 @@ spec:
         prometheus.io/port: "{{ .Values.service.port }}"
         prometheus.io/path: "/metrics"
     spec:
+      serviceAccountName: {{ include "microservice.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -36,6 +37,10 @@ spec:
             - name: SERVICE_NAME
               value: {{ .Chart.Name | quote }}
             - name: SERVICE_PORT
+              value: {{ .Values.service.targetPort | quote }}
+            - name: APP_PORT
+              value: {{ .Values.service.targetPort | quote }}
+            - name: PORT
               value: {{ .Values.service.targetPort | quote }}
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}

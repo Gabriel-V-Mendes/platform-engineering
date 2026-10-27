@@ -108,6 +108,8 @@ helm lint "$TARGET_DIR/helm" >/dev/null
 HELM_MANIFESTS="$(helm template "$TEST_SERVICE" "$TARGET_DIR/helm")"
 grep -q "kind: Deployment" <<< "$HELM_MANIFESTS"
 grep -q "kind: Service" <<< "$HELM_MANIFESTS"
+grep -q "kind: ServiceAccount" <<< "$HELM_MANIFESTS"
+grep -q "serviceAccountName: $TEST_SERVICE" <<< "$HELM_MANIFESTS"
 grep -q "runAsUser: 10001" <<< "$HELM_MANIFESTS"
 STEP5_END=$(date +%s)
 T_HELM=$((STEP5_END - STEP5_START))
