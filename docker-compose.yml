@@ -9,7 +9,7 @@ services:
     image: squidfunk/mkdocs-material:9.5.49
     container_name: idp-portal
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:${PORTAL_PORT:-8008}:8000"
     volumes:
       - .:/docs:ro
     command: ["serve", "--dev-addr=0.0.0.0:8000"]
@@ -34,10 +34,10 @@ services:
       dockerfile: Dockerfile
     container_name: golden-path-demo
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:${DEMO_SERVICE_PORT:-8088}:8080"
     environment:
       - SERVICE_NAME=demo-service
-      - SERVICE_PORT=8080
+      - APP_PORT=8080
       - ENVIRONMENT=local-dev
       - LOG_LEVEL=INFO
     read_only: true

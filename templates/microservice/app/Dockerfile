@@ -30,7 +30,7 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH" \
-    APP_PORT="{{SERVICE_PORT}}"
+    APP_PORT="8080"
 
 # Cria usuário e grupo de sistema com UID/GID 10001 sem privilégios e sem shell
 RUN groupadd --system --gid 10001 appgroup \
@@ -41,9 +41,9 @@ COPY --chown=root:root src/ /app/src/
 
 USER 10001:10001
 
-EXPOSE {{SERVICE_PORT}}
+EXPOSE 8080
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
-    CMD ["python", "-c", "import urllib.request, os; port=os.getenv('APP_PORT','{{SERVICE_PORT}}'); urllib.request.urlopen(f'http://127.0.0.1:{port}/health', timeout=2)"]
+    CMD ["python", "-c", "import urllib.request, os; port=os.getenv('APP_PORT','8080'); urllib.request.urlopen(f'http://127.0.0.1:{port}/health', timeout=2)"]
 
-CMD ["sh", "-c", "exec uvicorn src.main:app --host 0.0.0.0 --port ${APP_PORT:-{{SERVICE_PORT}}} --no-access-log"]
+CMD ["sh", "-c", "exec uvicorn src.main:app --host 0.0.0.0 --port ${APP_PORT:-8080} --no-access-log"]

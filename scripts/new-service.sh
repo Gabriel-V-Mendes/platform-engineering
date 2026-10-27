@@ -67,14 +67,18 @@ echo "  • Dono:    $OWNER"
 echo "------------------------------------------------------------------"
 
 mkdir -p "$TARGET_DIR"
-cp -r "$TEMPLATE_DIR/"* "$TEMPLATE_DIR/".* "$TARGET_DIR/" 2>/dev/null || cp -r "$TEMPLATE_DIR/"* "$TARGET_DIR/"
+cp -r "$TEMPLATE_DIR"/. "$TARGET_DIR"/
 
 # Substituicao de variaveis nos arquivos clonados
-find "$TARGET_DIR" -type f ! -path '*/.*' | while read -r file; do
+find "$TARGET_DIR" -type f ! -path '*/.git/*' | while read -r file; do
   sed -i "s|{{SERVICE_NAME}}|$NAME|g" "$file"
   sed -i "s|microservice-template|$NAME|g" "$file"
   sed -i "s|{{SERVICE_PORT}}|$PORT|g" "$file"
   sed -i "s|8080 # SERVICE_PORT|$PORT # SERVICE_PORT|g" "$file"
+  sed -i "s|APP_PORT=\"8080\"|APP_PORT=\"$PORT\"|g" "$file"
+  sed -i "s|EXPOSE 8080|EXPOSE $PORT|g" "$file"
+  sed -i "s|'APP_PORT','8080'|'APP_PORT','$PORT'|g" "$file"
+  sed -i "s|\${APP_PORT:-8080}|\${APP_PORT:-$PORT}|g" "$file"
   sed -i "s|{{SERVICE_OWNER}}|$OWNER|g" "$file"
   sed -i "s|{{SERVICE_DESCRIPTION}}|$DESC|g" "$file"
 done

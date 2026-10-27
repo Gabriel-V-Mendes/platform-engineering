@@ -13,6 +13,14 @@ TEST_SERVICE="golden-demo"
 TEST_PORT="8085"
 TARGET_DIR="$ROOT_DIR/services/$TEST_SERVICE"
 
+cleanup() {
+  docker stop "$TEST_SERVICE" >/dev/null 2>&1 || true
+  docker rm -f "$TEST_SERVICE" >/dev/null 2>&1 || true
+  rm -rf "$TARGET_DIR"
+  sed -i "/$TEST_SERVICE/d" "$ROOT_DIR/docs/catalog/services.md" 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
+
 echo "=================================================================="
 echo "INICIANDO TESTE E2E DO GOLDEN PATH (CRITÉRIO: < 30 MINUTOS)"
 echo "=================================================================="

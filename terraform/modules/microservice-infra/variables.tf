@@ -48,6 +48,12 @@ variable "kubernetes_namespace" {
   default     = "default"
 }
 
+variable "aws_account_id" {
+  type        = string
+  description = "ID da conta AWS para configuracao de IRSA"
+  default     = "123456789012"
+}
+
 variable "extra_tags" {
   type        = map(string)
   description = "Tags adicionais de governanca e FinOps"

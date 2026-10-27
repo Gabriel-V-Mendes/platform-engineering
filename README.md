@@ -101,8 +101,8 @@ make up     # ou: docker compose up -d --build --wait
 
 | Serviço | URL Local | Descrição |
 |---|---|---|
-| **Portal IDP & TechDocs (MkDocs)** | http://localhost:8000 | Portal de Engenharia de Plataforma com busca instantânea, ADRs e Runbooks |
-| **Microsserviço de Referência (`/docs`)** | http://localhost:8080/docs | Swagger/OpenAPI do serviço Golden Path com probes `/health`, `/health/ready` e métricas `/metrics` |
+| **Portal IDP & TechDocs (MkDocs)** | http://localhost:8008 | Portal de Engenharia de Plataforma com busca instantânea, ADRs e Runbooks |
+| **Microsserviço de Referência (`/docs`)** | http://localhost:8088/docs | Swagger/OpenAPI do serviço Golden Path com probes `/health`, `/health/ready` e métricas `/metrics` |
 
 Para derrubar a stack:
 ```bash
