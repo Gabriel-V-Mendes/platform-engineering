@@ -120,7 +120,7 @@ fi
 # Registra no catalogo de software (docs/catalog/services.md)
 CATALOG_FILE="$ROOT_DIR/docs/catalog/services.md"
 if [ -f "$CATALOG_FILE" ]; then
-  if ! grep -q "\|\s*\*\*.*$NAME" "$CATALOG_FILE"; then
+  if ! grep -q "\`$NAME\`" "$CATALOG_FILE"; then
     echo "| **\`$NAME\`** | \`$OWNER\` | Python 3.12 (FastAPI) | $PORT | Desenvolvimento | v1.0.0 |" >> "$CATALOG_FILE"
     echo "  ✔ Servico registrado no Catalogo do IDP ($CATALOG_FILE)"
   fi

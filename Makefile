@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 
-.PHONY: help up down restart ps logs test lint new-service verify secrets docs
+.PHONY: help up down restart ps logs test lint new-service verify battery secrets docs
 
 help: ## Lista todos os comandos disponíveis na plataforma
 	@grep -E '^[a-zA-Z0-9_-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -38,6 +38,10 @@ new-service: ## Cria um novo microsserviço a partir do Golden Path (ex: make ne
 verify: ## Executa a validação cronometrada do Golden Path (Criação + Build + Deploy + Probes em < 30 minutos)
 	chmod +x ./scripts/verify-golden-path.sh
 	./scripts/verify-golden-path.sh
+
+battery: ## Executa bateria completa de testes E2E, stress, segurança e conformidade da plataforma
+	chmod +x ./scripts/test-battery-e2e.sh
+	./scripts/test-battery-e2e.sh
 
 docs: ## Compila a documentação do MkDocs em modo estático com validação de links
 	docker run --rm -v "$$PWD:/docs" squidfunk/mkdocs-material:9.5.49 build --strict
