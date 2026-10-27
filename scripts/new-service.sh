@@ -69,19 +69,46 @@ echo "------------------------------------------------------------------"
 mkdir -p "$TARGET_DIR"
 cp -r "$TEMPLATE_DIR"/. "$TARGET_DIR"/
 
-# Substituicao de variaveis nos arquivos clonados
-find "$TARGET_DIR" -type f ! -path '*/.git/*' | while read -r file; do
-  sed -i "s|{{SERVICE_NAME}}|$NAME|g" "$file"
-  sed -i "s|microservice-template|$NAME|g" "$file"
-  sed -i "s|{{SERVICE_PORT}}|$PORT|g" "$file"
-  sed -i "s|8080 # SERVICE_PORT|$PORT # SERVICE_PORT|g" "$file"
-  sed -i "s|APP_PORT=\"8080\"|APP_PORT=\"$PORT\"|g" "$file"
-  sed -i "s|EXPOSE 8080|EXPOSE $PORT|g" "$file"
-  sed -i "s|'APP_PORT','8080'|'APP_PORT','$PORT'|g" "$file"
-  sed -i "s|\${APP_PORT:-8080}|\${APP_PORT:-$PORT}|g" "$file"
-  sed -i "s|{{SERVICE_OWNER}}|$OWNER|g" "$file"
-  sed -i "s|{{SERVICE_DESCRIPTION}}|$DESC|g" "$file"
-done
+# Substituicao segura de variaveis nos arquivos clonados (literal string replacement via Python)
+python3 -c '
+import sys, os
+
+target_dir = sys.argv[1]
+name = sys.argv[2]
+port = sys.argv[3]
+owner = sys.argv[4]
+desc = sys.argv[5]
+
+replacements = [
+    ("{{SERVICE_NAME}}", name),
+    ("microservice-template", name),
+    ("{{SERVICE_PORT}}", port),
+    ("8080 # SERVICE_PORT", f"{port} # SERVICE_PORT"),
+    ("APP_PORT=\"8080\"", f"APP_PORT=\"{port}\""),
+    ("EXPOSE 8080", f"EXPOSE {port}"),
+    ("\x27APP_PORT\x27,\x278080\x27", f"\x27APP_PORT\x27,\x27{port}\x27"),
+    ("${APP_PORT:-8080}", f"${{APP_PORT:-{port}}}"),
+    ("{{SERVICE_OWNER}}", owner),
+    ("{{SERVICE_DESCRIPTION}}", desc),
+]
+
+for root, dirs, files in os.walk(target_dir):
+    if ".git" in dirs:
+        dirs.remove(".git")
+    for file in files:
+        filepath = os.path.join(root, file)
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                content = f.read()
+            original = content
+            for old, new in replacements:
+                content = content.replace(old, new)
+            if content != original:
+                with open(filepath, "w", encoding="utf-8") as f:
+                    f.write(content)
+        except (UnicodeDecodeError, IsADirectoryError):
+            pass
+' "$TARGET_DIR" "$NAME" "$PORT" "$OWNER" "$DESC"
 
 # Validacao do Helm Chart gerado
 if command -v helm >/dev/null 2>&1; then

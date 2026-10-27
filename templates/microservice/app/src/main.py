@@ -32,6 +32,8 @@ from pydantic import BaseModel, Field
 SERVICE_NAME = os.getenv("SERVICE_NAME", "{{SERVICE_NAME}}")
 SERVICE_VERSION = os.getenv("SERVICE_VERSION", "1.0.0")
 SERVICE_ENV = os.getenv("ENVIRONMENT", "production")
+SERVICE_OWNER = os.getenv("SERVICE_OWNER", "{{SERVICE_OWNER}}")
+SERVICE_DESCRIPTION = os.getenv("SERVICE_DESCRIPTION", "{{SERVICE_DESCRIPTION}}")
 
 # ==============================================================================
 # Logs Estruturados em JSON
@@ -96,10 +98,11 @@ KNOWN_ENDPOINTS = {
     "/metrics",
     "/items",
     "/info",
+    "/simulate-error",
 }
 
 ITEMS_DB: list[dict[str, Any]] = [
-    {"id": 1, "name": "Servico Padrao Golden Path", "owner": "{{SERVICE_OWNER}}"},
+    {"id": 1, "name": "Servico Padrao Golden Path", "owner": SERVICE_OWNER},
 ]
 
 IS_READY = True
@@ -113,7 +116,7 @@ class ItemPayload(BaseModel):
 app = FastAPI(
     title=f"{SERVICE_NAME.capitalize()} API",
     version=SERVICE_VERSION,
-    description="{{SERVICE_DESCRIPTION}}",
+    description=SERVICE_DESCRIPTION,
 )
 
 
@@ -216,7 +219,7 @@ def info() -> dict[str, Any]:
         "service": SERVICE_NAME,
         "version": SERVICE_VERSION,
         "environment": SERVICE_ENV,
-        "owner": "{{SERVICE_OWNER}}",
+        "owner": SERVICE_OWNER,
         "golden_path": "v1.0.0",
     }
 
@@ -234,8 +237,16 @@ def create_item(payload: ItemPayload) -> dict[str, Any]:
         "id": len(ITEMS_DB) + 1,
         "name": payload.name,
         "description": payload.description,
-        "owner": "{{SERVICE_OWNER}}",
+        "owner": SERVICE_OWNER,
     }
     ITEMS_DB.append(new_item)
     log_json(level="INFO", message="Novo item criado", item_id=new_item["id"], name=payload.name)
     return new_item
+
+
+@app.get("/simulate-error")
+def simulate_error(unhandled: bool = False) -> dict[str, str]:
+    """Endpoint utilitario para teste e simulacao de alertas SRE / HTTP 500."""
+    if unhandled:
+        raise RuntimeError("Simulated unhandled exception")
+    raise HTTPException(status_code=500, detail="Simulated internal server error")

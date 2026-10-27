@@ -9,7 +9,7 @@ help: ## Lista comandos disponíveis para este microsserviço
 test: ## Executa testes unitários com pytest e cobertura mínima de 90%
 	docker run --rm -e PYTHONDONTWRITEBYTECODE=1 -e COVERAGE_FILE=/tmp/.coverage \
 		-v "$$PWD/app:/app:ro" -w /app python:3.12-slim-bookworm \
-		sh -c "pip install -q --no-cache-dir -r requirements-dev.txt && pytest -v -o cache_dir=/tmp/pytest_cache --cov=src --cov-fail-under=90"
+		sh -c "pip install -q --no-cache-dir --root-user-action=ignore -r requirements-dev.txt && pytest -v -o cache_dir=/tmp/pytest_cache --cov=src --cov-fail-under=90"
 
 lint: ## Executa linter Ruff no código Python
 	docker run --rm -v "$$PWD/app:/app:ro" -w /app ghcr.io/astral-sh/ruff:0.9.2 check --no-cache src tests

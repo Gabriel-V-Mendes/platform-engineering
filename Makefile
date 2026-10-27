@@ -23,7 +23,7 @@ logs: ## Exibe logs em tempo real do portal IDP e do serviço demo
 test: ## Executa a suíte de testes automatizados da aplicação template (>90% cobertura)
 	docker run --rm -e PYTHONDONTWRITEBYTECODE=1 -e COVERAGE_FILE=/tmp/.coverage \
 		-v "$$PWD/templates/microservice/app:/app:ro" -w /app python:3.12-slim-bookworm \
-		sh -c "pip install -q --no-cache-dir -r requirements-dev.txt && pytest -v -o cache_dir=/tmp/pytest_cache --cov=src --cov-fail-under=90"
+		sh -c "pip install -q --no-cache-dir --root-user-action=ignore -r requirements-dev.txt && pytest -v -o cache_dir=/tmp/pytest_cache --cov=src --cov-fail-under=90"
 
 lint: ## Valida qualidade Python (Ruff), Terraform (fmt/validate) e Helm (lint)
 	docker run --rm -v "$$PWD/templates/microservice/app:/app:ro" -w /app ghcr.io/astral-sh/ruff:0.9.2 check --no-cache src tests

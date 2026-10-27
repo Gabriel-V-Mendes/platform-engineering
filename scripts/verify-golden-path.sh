@@ -50,7 +50,7 @@ docker run --rm \
   -e COVERAGE_FILE=/tmp/.coverage \
   -v "$TARGET_DIR/app:/app:ro" \
   -w /app python:3.12-slim-bookworm \
-  sh -c "pip install -q --no-cache-dir -r requirements-dev.txt && pytest -q -o cache_dir=/tmp/pytest_cache --cov=src --cov-fail-under=90"
+  sh -c "pip install -q --no-cache-dir --root-user-action=ignore -r requirements-dev.txt && pytest -q -o cache_dir=/tmp/pytest_cache --cov=src --cov-fail-under=90"
 STEP2_END=$(date +%s)
 T_TESTS=$((STEP2_END - STEP2_START))
 echo "  ✔ Testes unitarios aprovados (>90% cobertura) em ${T_TESTS}s!"

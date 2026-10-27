@@ -21,6 +21,15 @@ def test_health_readiness() -> None:
     assert resp.json()["status"] == "ready"
 
 
+def test_health_readiness_not_ready(monkeypatch) -> None:
+    import src.main as main_module
+
+    monkeypatch.setattr(main_module, "IS_READY", False)
+    resp = client.get("/health/ready")
+    assert resp.status_code == 503
+    assert resp.json()["detail"] == "Service not ready"
+
+
 def test_info_endpoint() -> None:
     resp = client.get("/info")
     assert resp.status_code == 200
@@ -59,3 +68,25 @@ def test_unknown_path_normalization() -> None:
     metrics_text = client.get("/metrics").text
     assert "/rota-inexistente-12345" not in metrics_text
     assert 'endpoint="/unknown"' in metrics_text
+
+
+def test_items_id_path_normalization() -> None:
+    resp = client.get("/items/999")
+    assert resp.status_code == 404
+
+    metrics_text = client.get("/metrics").text
+    assert 'endpoint="/items/{id}"' in metrics_text
+
+
+def test_simulate_error_and_unhandled_exception() -> None:
+    resp_500 = client.get("/simulate-error")
+    assert resp_500.status_code == 500
+    assert resp_500.json()["detail"] == "Simulated internal server error"
+
+    import pytest
+
+    with pytest.raises(RuntimeError):
+        client.get("/simulate-error?unhandled=true")
+
+    metrics_text = client.get("/metrics").text
+    assert 'app_errors_total{endpoint="/simulate-error"' in metrics_text

@@ -35,9 +35,8 @@ resource "aws_ecr_lifecycle_policy" "this" {
         description  = "Mantem as ultimas ${var.ecr_image_retention_count} imagens"
         selection = {
           tagStatus   = "any"
-          countType   = "sinceImagePushed"
-          countUnit   = "days"
-          countNumber = 30
+          countType   = "imageCountMoreThan"
+          countNumber = var.ecr_image_retention_count
         }
         action = {
           type = "expire"
