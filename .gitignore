@@ -1,0 +1,41 @@
+# Python & Pytest
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+!*.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Helm
+*.tgz
+
+# MkDocs
+site/
+
+# IDEs & OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Docker / Logs
+*.log
+
+# Generated test artifacts
+/services/golden-demo/

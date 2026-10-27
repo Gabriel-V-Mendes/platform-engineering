@@ -1,0 +1,75 @@
+site_name: "Developer Platform Portal — Golden Path IDP"
+site_description: "Portal Interno de Engenharia de Plataforma (Substituto Leve do Backstage): Golden Paths, Catalogo de Servicos, ADRs e Runbooks"
+site_author: "Gabriel V. Mendes"
+repo_name: "Gabriel-V-Mendes/platform-engineering-idp"
+repo_url: "https://github.com/Gabriel-V-Mendes/platform-engineering-idp"
+
+theme:
+  name: material
+  language: pt
+  palette:
+    # Modo Claro
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Alternar para modo escuro
+    # Modo Escuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: light blue
+      toggle:
+        icon: material/weather-sunny
+        name: Alternar para modo claro
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+
+nav:
+  - "Início": index.md
+  - "Golden Path":
+      - "Visão Geral": golden-path/index.md
+      - "Template Microsserviço": golden-path/microservice-template.md
+      - "Guia CLI (make new-service)": golden-path/cli-guide.md
+  - "Catálogo de Serviços": catalog/services.md
+  - "ADRs (Decisões de Arquitetura)":
+      - "ADR-001: Substituição do Backstage": adrs/ADR-001-substituicao-backstage-por-idp-estatico.md
+      - "ADR-002: Padrão Golden Path": adrs/ADR-002-golden-path-fastapi-docker-helm.md
+      - "ADR-003: Reusable Workflows CI": adrs/ADR-003-reusable-workflows-github-actions.md
+      - "ADR-004: Terraform Versionado": adrs/ADR-004-modulos-terraform-versionados.md
+  - "Runbooks Operacionais":
+      - "Onboarding de Novo Serviço": runbooks/onboarding-novo-servico.md
+      - "Falha de Deploy Helm": runbooks/falha-deploy-helm.md
+      - "Rollback Automatizado": runbooks/rollback-automatizado.md
+      - "Quebra de Segurança & Secrets": runbooks/quebra-seguranca-secrets.md

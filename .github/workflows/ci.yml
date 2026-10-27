@@ -1,0 +1,98 @@
+name: Platform & IDP CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # ============================================================================
+  # 1. Seguranca: Gitleaks no historico completo
+  # ============================================================================
+  security-audit:
+    name: Gitleaks Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Completo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks Scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================================
+  # 2. Validacao do Modulo Terraform
+  # ============================================================================
+  terraform-validation:
+    name: Terraform Lint & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.4
+
+      - name: Validar Modulo de Infraestrutura
+        run: |
+          cd terraform/modules/microservice-infra
+          terraform init -backend=false
+          terraform fmt -check
+          terraform validate
+
+      - name: Validar Exemplo de Consumo Versionado
+        run: |
+          cd terraform/examples/consumer-service
+          terraform init -backend=false
+          terraform fmt -check
+          terraform validate
+
+  # ============================================================================
+  # 3. Teste do Template Golden Path e Verificacao E2E (< 30 minutos)
+  # ============================================================================
+  golden-path-verification:
+    name: Golden Path E2E Test & Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Repositorio
+        uses: actions/checkout@v4
+
+      - name: Executar Suite de Testes e Criacao de Servico
+        run: |
+          chmod +x scripts/*.sh
+          ./scripts/verify-golden-path.sh
+
+  # ============================================================================
+  # 4. Validacao da Documentacao MkDocs
+  # ============================================================================
+  mkdocs-build:
+    name: MkDocs Documentation Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar MkDocs Material
+        run: pip install mkdocs-material
+
+      - name: Build do Portal MkDocs
+        run: mkdocs build --strict

@@ -1,0 +1,38 @@
+name: Reusable Helm Workflow
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        required: true
+        type: string
+        description: "Nome do microsservico"
+      chart-path:
+        required: false
+        type: string
+        default: "helm"
+        description: "Caminho do Helm Chart"
+
+permissions:
+  contents: read
+
+jobs:
+  helm-lint-and-template:
+    name: Helm Lint & Render (${{ inputs.service-name }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.4
+
+      - name: Helm Lint
+        run: |
+          helm lint ${{ inputs.chart-path }}
+
+      - name: Helm Template (Dry-Run Render)
+        run: |
+          helm template ci-test-release ${{ inputs.chart-path }} --dry-run

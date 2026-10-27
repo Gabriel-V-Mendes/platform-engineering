@@ -1,0 +1,32 @@
+name: Reusable Security Workflow
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        required: true
+        type: string
+        description: "Nome do microsservico para auditoria de seguranca"
+      dockerfile-path:
+        required: false
+        type: string
+        default: "app/Dockerfile"
+        description: "Caminho do Dockerfile"
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks-scan:
+    name: Gitleaks Scan (${{ inputs.service-name }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Completo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Executar Gitleaks no Historico Git
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

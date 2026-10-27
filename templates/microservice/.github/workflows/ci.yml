@@ -1,0 +1,35 @@
+name: Microservice CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ============================================================================
+  # 1. Validação de Código e Imagem Container (Reusable Workflow)
+  # ============================================================================
+  code-quality-and-build:
+    uses: Gabriel-V-Mendes/platform-engineering-idp/.github/workflows/reusable-ci.yml@main
+    with:
+      service-name: "{{SERVICE_NAME}}"
+      python-version: "3.12"
+      coverage-threshold: 90
+
+  # ============================================================================
+  # 2. Varredura de Segurança (Reusable Workflow)
+  # ============================================================================
+  security-scan:
+    uses: Gabriel-V-Mendes/platform-engineering-idp/.github/workflows/reusable-security.yml@main
+    with:
+      service-name: "{{SERVICE_NAME}}"
+
+  # ============================================================================
+  # 3. Validação do Chart Helm (Reusable Workflow)
+  # ============================================================================
+  helm-validation:
+    uses: Gabriel-V-Mendes/platform-engineering-idp/.github/workflows/reusable-helm.yml@main
+    with:
+      service-name: "{{SERVICE_NAME}}"
+      chart-path: "helm"

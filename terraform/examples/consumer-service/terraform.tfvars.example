@@ -1,0 +1,7 @@
+aws_region           = "us-east-1"
+service_name         = "checkout-service"
+environment          = "production"
+owner                = "team-checkout"
+enable_s3_bucket     = true
+eks_oidc_issuer_url  = "oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE12345"
+kubernetes_namespace = "checkout"

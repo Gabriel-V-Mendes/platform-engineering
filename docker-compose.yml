@@ -1,0 +1,66 @@
+# ==============================================================================
+# Docker Compose — Plataforma Mínima de Engenharia de Plataforma & IDP
+# Sobe com um único comando:
+#   make up  (ou docker compose up -d --build --wait)
+# ==============================================================================
+services:
+  # 1. Portal IDP (Documentacao MkDocs Material com Busca, ADRs e Runbooks)
+  idp-portal:
+    image: squidfunk/mkdocs-material:9.5.49
+    container_name: idp-portal
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - .:/docs:ro
+    command: ["serve", "--dev-addr=0.0.0.0:8000"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8000/"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+    restart: unless-stopped
+    networks:
+      - platform_net
+
+  # 2. Microsservico de Referencia Golden Path (FastAPI + Metricas RED + JSON Logs)
+  demo-service:
+    build:
+      context: ./templates/microservice/app
+      dockerfile: Dockerfile
+    container_name: golden-path-demo
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      - SERVICE_NAME=demo-service
+      - SERVICE_PORT=8080
+      - ENVIRONMENT=local-dev
+      - LOG_LEVEL=INFO
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+    restart: unless-stopped
+    networks:
+      - platform_net
+
+networks:
+  platform_net:
+    driver: bridge
