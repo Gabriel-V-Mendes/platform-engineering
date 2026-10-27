@@ -1,6 +1,6 @@
 # Projeto 5 · Plataforma Mínima e Runbooks (Substituto Leve do Backstage)
 
-[![Platform & IDP CI](https://github.com/Gabriel-V-Mendes/platform-engineering-idp/actions/workflows/ci.yml/badge.svg)](https://github.com/Gabriel-V-Mendes/platform-engineering-idp/actions/workflows/ci.yml)
+[![Platform & IDP CI](https://github.com/Gabriel-V-Mendes/platform-enginnering/actions/workflows/ci.yml/badge.svg)](https://github.com/Gabriel-V-Mendes/platform-enginnering/actions/workflows/ci.yml)
 
 Plataforma Interna de Desenvolvedor (**Internal Developer Platform - IDP**) leve, declarativa e de baixo custo, projetada para substituir a complexidade e a sobrecarga operacional do **Spotify Backstage**.
 
@@ -165,7 +165,7 @@ Exemplo de consumo por outro repositório via Git Tag semântica:
 
 ```hcl
 module "meu_servico" {
-  source = "git::https://github.com/Gabriel-V-Mendes/platform-engineering-idp.git//terraform/modules/microservice-infra?ref=v1.0.0"
+  source = "git::https://github.com/Gabriel-V-Mendes/platform-enginnering.git//terraform/modules/microservice-infra?ref=v1.0.0"
 
   service_name        = "faturamento-api"
   environment         = "production"

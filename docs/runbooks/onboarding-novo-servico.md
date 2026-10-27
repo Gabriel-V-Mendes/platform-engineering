@@ -26,7 +26,7 @@ make build   # Constrói o contêiner Docker multi-stage
 No repositório de infraestrutura do time, declare o consumo do módulo Terraform:
 ```hcl
 module "meu_servico" {
-  source       = "git::https://github.com/Gabriel-V-Mendes/platform-engineering-idp.git//terraform/modules/microservice-infra?ref=v1.0.0"
+  source       = "git::https://github.com/Gabriel-V-Mendes/platform-enginnering.git//terraform/modules/microservice-infra?ref=v1.0.0"
   service_name = "<nome-do-servico>"
   owner        = "<time-responsavel>"
   environment  = "production"

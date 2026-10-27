@@ -16,7 +16,7 @@ Módulo reutilizável e padronizado da plataforma para provisionar a infraestrut
 
 ```hcl
 module "payment_infra" {
-  source = "git::https://github.com/Gabriel-V-Mendes/platform-engineering-idp.git//terraform/modules/microservice-infra?ref=v1.0.0"
+  source = "git::https://github.com/Gabriel-V-Mendes/platform-enginnering.git//terraform/modules/microservice-infra?ref=v1.0.0"
 
   service_name = "payment-api"
   environment  = "production"
