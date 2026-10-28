@@ -9,9 +9,9 @@
 ## 1. Contexto
 
 O time avaliou a adoção do **Spotify Backstage** como portal interno de desenvolvedor (IDP). Embora o Backstage possua um ecossistema extenso, identificamos pontos de atrito críticos para a nossa realidade:
-1. **Sobrecarga Técnica:** O Backstage exige desenvolvimento contínuo em TypeScript e React, além de manutenção pesada de dependências (`yarn`/Node.js).
-2. **Custo e Consumo de Recursos:** Cada pod do Backstage consome entre 2 GB e 4 GB de memória RAM, requer um banco PostgreSQL dedicado e gera custos mensais de US$ 80 a US$ 150 em nuvem.
-3. **Complexidade de Customização:** Criar novos templates no Backstage Software Templates envolve sintaxe complexa de actions, validação JSON Schema e testes de frontend.
+1. **Sobrecarga Técnica:** O Backstage exige desenvolvimento contínuo em TypeScript e React, além de manutenção de dependências em monorepo (`yarn`/Node.js).
+2. **Requisitos de Infraestrutura:** O Backstage requer um banco de dados PostgreSQL dedicado para produção (o SQLite padrão opera apenas em memória para testes locais) e alocação permanente de runtimes Node.js.
+3. **Complexidade de Customização:** Criar novos templates no Backstage Software Templates envolve sintaxe de actions e formulários dinâmicos em React.
 
 ---
 
@@ -27,7 +27,7 @@ Decidimos **substituir o Backstage** por uma arquitetura de IDP estática, leve 
 ## 3. Consequências
 
 ### Positivas
-- **Custo Quase Zero:** O portal estático pode ser servido via GitHub Pages ou container Nginx consumindo menos de 20 MB de RAM.
+- **Consumo de Recursos Reduzido:** O portal estático consome cerca de 33,8 MiB de RAM em contêiner (medido via `docker stats`), sem necessidade de banco relacional.
 - **Simplicidade:** Qualquer engenheiro da organização sabe escrever Markdown e editar variáveis de ambiente.
 - **Performance Extrema:** O portal carrega instantaneamente (< 100ms) com busca offline de alta precisão.
 

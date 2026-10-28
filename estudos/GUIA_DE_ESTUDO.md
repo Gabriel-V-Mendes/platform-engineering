@@ -50,15 +50,14 @@ O **Backstage** (criado pelo Spotify e doado à CNCF) tornou-se a referência vi
 1. **Exigência de TypeScript e Frontend Complexo:**
    - O Backstage não é um software pronto; é um *framework*. Qualquer modificação, novo template ou integração exige programar em TypeScript e React.
    - Times de DevOps/SRE raramente têm desenvolvedores frontend dedicados para manter o portal.
-2. **Consumo Desmedido de Infraestrutura:**
-   - Um único pod do Backstage consome entre **2 GB e 4 GB de memória RAM**.
-   - Requer um banco relacional **PostgreSQL dedicado** e cache.
-   - Em clusters gerenciados (EKS/GKE), isso custa entre **US$ 80 e US$ 160 por mês** apenas para manter a documentação e templates no ar.
+2. **Requisitos de Infraestrutura Adicionais:**
+   - Em produção, exige alocação de banco relacional PostgreSQL gerenciado permanente e pods em Node.js.
+   - O SQLite padrão é expressamente documentado pelo projeto apenas para testes voláteis em memória.
 3. **Instabilidade de Dependências (*Dependency Hell*):**
    - O ecossistema `@backstage/*` lança atualizações semanais com breaking changes frequentes no `yarn.lock`.
 4. **Substituição Inteligente por Esta Plataforma Mínima:**
-   - **Documentação:** **Material for MkDocs** gerado como site estático servido em Nginx (**< 20 MB de RAM**, custo < US$ 2/mês).
-   - **Templates:** Scripts CLI declarativos em Bash/Make (`make new-service`) que substituem variáveis em 1 segundo.
+   - **Documentação:** **Material for MkDocs** gerado como site estático servido em contêiner (medido em **~33,8 MiB** de RAM via `docker stats`).
+   - **Templates:** Scripts CLI declarativos em Bash/Make (`make new-service`) que instanciam serviços em ~1 segundo.
    - **Governança:** Reusable Workflows no GitHub Actions.
 
 ---
@@ -221,7 +220,7 @@ O comando executa o contêiner oficial do Gitleaks no histórico Git completo e 
 ### Perguntas Típicas de Entrevista para Platform Engineer / SRE Sênior
 
 1. **"Por que muitas empresas falham na adoção do Spotify Backstage?"**
-   *Resposta esperada:* O Backstage é frequentemente adotado como se fosse um produto pronto de prateleira, quando na verdade é um framework de código aberto que exige uma equipe dedicada de desenvolvimento frontend/backend em TypeScript e React. Para empresas que não possuem recursos para sustentar uma equipe de produto interna só para manter o portal, o Backstage vira um legado pesado de 4 GB de RAM com dependências frágeis. Uma abordagem leve com documentação estática (MkDocs), templates automatizados (Golden Paths) e Reusable Workflows entrega 90% dos benefícios com menos de 5% do custo operacional.
+   *Resposta esperada:* O Backstage é frequentemente adotado como se fosse um produto pronto de prateleira, quando na verdade é um framework de código aberto que exige uma equipe dedicada de desenvolvimento frontend/backend em TypeScript e React. Para empresas que não possuem recursos para sustentar uma equipe de produto interna só para manter o portal, o Backstage vira uma sobrecarga operacional de manutenção. Uma abordagem leve com documentação estática (MkDocs), templates automatizados (Golden Paths) e Reusable Workflows entrega os benefícios essenciais de governança com custo e atrito operacional mínimos.
 
 2. **"O que diferencia um Golden Path de uma imposição autoritária de ferramentas?"**
    *Resposta esperada:* Um Golden Path é o caminho da menor resistência (*path of least resistance*), não uma proibição. Ele oferece incentivos claros: quem utiliza o Golden Path ganha pipelines de CI/CD pré-testadas, observabilidade embutida, contêineres seguros e manifests de deploy validados pela plataforma. Se um time precisar usar Rust ou Go para um caso específico de latência extrema, ele tem liberdade para fazê-lo, mas arcará com a responsabilidade de construir sua própria esteira de homologação.

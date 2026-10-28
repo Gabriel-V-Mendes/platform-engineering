@@ -12,10 +12,11 @@ O **Spotify Backstage** tornou-se a ferramenta mais conhecida para IDPs, mas tra
 
 | Desafio no Backstage Tradicional | Como Resolvemos Nesta Plataforma Mínima |
 |---|---|
-| **Exige TypeScript e React** para qualquer ajuste ou novo template | **100% Declarativo:** MkDocs (Markdown), Bash/Make, Helm e Terraform |
-| **Consumo Pesado de Recursos:** ~2 a 4 GB de RAM por pod + PostgreSQL dedicado (~US$ 80 a 150/mês) | **Ultraleve:** HTML estático servido via Nginx / GitHub Pages (**< 20 MB de RAM**, custo ~US$ 0) |
-| **Manutenção Complexa:** dependências `yarn` instáveis e breaking changes constantes no ecossistema de plugins | **Zero Dependências Frágeis:** contêinerização limpa, versionamento Git e Reusable Workflows |
-| **Tempo para criar novo serviço:** horas configurando entidades `catalog-info.yaml` e templates | **Menos de 30 segundos** com um único comando (`make new-service`) |
+| **Exige TypeScript, Node.js e React** para qualquer ajuste ou novo template | **100% Declarativo:** MkDocs (Markdown), Python, Helm e Terraform |
+| **Banco de Dados Obrigatório:** SQLite é apenas em memória; produção exige PostgreSQL dedicado | **Sem Banco de Dados:** Portal estático servido via Nginx / Docker |
+| **Consumo de Memória:** Requer alocação de runtime Node.js e processos Webpack | **Ultraleve:** Portal estático medido em **~33,8 MiB** de RAM |
+| **Manutenção Complexa:** Dependências `yarn` instáveis e breaking changes no ecossistema de plugins | **Zero Dependências Frágeis:** Contêinerização imutável, versionamento Git semântico e Reusable Workflows |
+| **Tempo para criar novo serviço:** Configuração manual de arquivos YAML de catálogo e actions | **Comando Único:** `make new-service` gera o serviço, valida Helm e cataloga em **~1 segundo** |
 
 ---
 

@@ -21,12 +21,10 @@ provider "aws" {
 }
 
 # ==============================================================================
-# Consumo do Modulo de Infraestrutura Versionado da Plataforma
-# Em producao externa:
-#   source = "git::https://github.com/Gabriel-V-Mendes/platform-enginnering.git//terraform/modules/microservice-infra?ref=v1.0.0"
+# Consumo do Modulo de Infraestrutura Versionado da Plataforma via Git Tag
 # ==============================================================================
 module "microservice_infra" {
-  source = "../../modules/microservice-infra"
+  source = "git::https://github.com/Gabriel-V-Mendes/platform-engineering.git//terraform/modules/microservice-infra?ref=v1.0.0"
 
   service_name              = var.service_name
   environment               = var.environment

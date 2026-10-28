@@ -11,7 +11,7 @@ jobs:
   # 1. Validação de Código e Imagem Container (Reusable Workflow)
   # ============================================================================
   code-quality-and-build:
-    uses: Gabriel-V-Mendes/platform-enginnering/.github/workflows/reusable-ci.yml@main
+    uses: Gabriel-V-Mendes/platform-engineering/.github/workflows/reusable-ci.yml@v1.0.0
     with:
       service-name: "{{SERVICE_NAME}}"
       python-version: "3.12"
@@ -21,7 +21,7 @@ jobs:
   # 2. Varredura de Segurança (Reusable Workflow)
   # ============================================================================
   security-scan:
-    uses: Gabriel-V-Mendes/platform-enginnering/.github/workflows/reusable-security.yml@main
+    uses: Gabriel-V-Mendes/platform-engineering/.github/workflows/reusable-security.yml@v1.0.0
     with:
       service-name: "{{SERVICE_NAME}}"
 
@@ -29,7 +29,7 @@ jobs:
   # 3. Validação do Chart Helm (Reusable Workflow)
   # ============================================================================
   helm-validation:
-    uses: Gabriel-V-Mendes/platform-enginnering/.github/workflows/reusable-helm.yml@main
+    uses: Gabriel-V-Mendes/platform-engineering/.github/workflows/reusable-helm.yml@v1.0.0
     with:
       service-name: "{{SERVICE_NAME}}"
       chart-path: "helm"

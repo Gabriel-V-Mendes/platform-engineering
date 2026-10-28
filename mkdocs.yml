@@ -1,8 +1,8 @@
 site_name: "Developer Platform Portal — Golden Path IDP"
 site_description: "Portal Interno de Engenharia de Plataforma (Substituto Leve do Backstage): Golden Paths, Catalogo de Servicos, ADRs e Runbooks"
 site_author: "Gabriel V. Mendes"
-repo_name: "Gabriel-V-Mendes/platform-enginnering"
-repo_url: "https://github.com/Gabriel-V-Mendes/platform-enginnering"
+repo_name: "Gabriel-V-Mendes/platform-engineering"
+repo_url: "https://github.com/Gabriel-V-Mendes/platform-engineering"
 
 theme:
   name: material

@@ -1,54 +1,55 @@
 # Projeto 5 · Plataforma Mínima e Runbooks (Substituto Leve do Backstage)
 
-[![Platform & IDP CI](https://github.com/Gabriel-V-Mendes/platform-enginnering/actions/workflows/ci.yml/badge.svg)](https://github.com/Gabriel-V-Mendes/platform-enginnering/actions/workflows/ci.yml)
+[![Platform & IDP CI](https://github.com/Gabriel-V-Mendes/platform-engineering/actions/workflows/ci.yml/badge.svg)](https://github.com/Gabriel-V-Mendes/platform-engineering/actions/workflows/ci.yml)
+[![Terraform Remote Module Validate](https://github.com/Gabriel-V-Mendes/terraform-consumer-microservice/actions/workflows/ci.yml/badge.svg)](https://github.com/Gabriel-V-Mendes/terraform-consumer-microservice/actions/workflows/ci.yml)
 
-Plataforma Interna de Desenvolvedor (**Internal Developer Platform - IDP**) leve, declarativa e de baixo custo, projetada para substituir a complexidade e a sobrecarga operacional do **Spotify Backstage**.
+Plataforma Interna de Desenvolvedor (**Internal Developer Platform - IDP**) declarativa e de baixo custo operacional, desenvolvida como alternativa à complexidade de manutenção do **Spotify Backstage**.
 
-Fornece um **Golden Path (Caminho Dourado)** de engenharia onde qualquer desenvolvedor cria um novo microsserviço de backend com testes, métricas Prometheus, logs estruturados em JSON, contêiner seguro (UID 10001), manifests Helm, módulos Terraform versionados e pipelines de CI reutilizáveis em **menos de 30 minutos** (medido: **~20 segundos** via automação).
+O projeto estabelece um **Golden Path (Caminho Pavimentado)** para times de engenharia, composto por:
+1. **Template oficial de microsserviço:** FastAPI 0.115+, Python 3.12-slim, métricas RED no Prometheus, logs JSON estruturados na stdout, contêiner hardened com usuário não-root (UID 10001) e Helm Chart de produção.
+2. **Governança centralizada de CI/CD:** Workflows reutilizáveis (*Reusable Workflows*) no GitHub Actions fixados por versão semântica (`@v1.0.0`).
+3. **Módulo Terraform versionado:** Provisionamento de infraestrutura em nuvem (ECR, S3, IAM IRSA) versionado por tag Git semântica (`?ref=v1.0.0`).
+4. **Portal de documentação e runbooks:** MkDocs Material servindo catálogo de serviços, ADRs e procedimentos operacionais padronizados.
+5. **Automação via CLI:** Comando `make new-service` para instanciação de novos serviços com validação imediata.
 
 ---
 
-## 1. Problema (Antes vs Depois: Por Que Substituir o Backstage?)
+## 1. Problema e Motivação: Por Que Substituir o Backstage?
 
-O **Spotify Backstage** é frequentemente apresentado como a solução padrão para portais internos de desenvolvedor. No entanto, sua adoção em equipes que buscam eficiência operacional gera atritos graves:
+O **Spotify Backstage** é uma referência consolidada no ecossistema de Platform Engineering, mas impõe requisitos técnicos e operacionais pesados para equipes que buscam produtividade sem sustentar uma equipe exclusiva de frontend:
 
-| Dimensão | O Desafio do Backstage Tradicional | Como Resolvemos Nesta Plataforma Mínima |
+| Dimensão | Spotify Backstage (Fatos Documentados) | Plataforma Mínima (Medições Deste Projeto) |
 |---|---|---|
-| **Linguagem & Manutenção** | Exige **TypeScript, Node.js e React** para qualquer ajuste, plugin ou personalização de template | **100% Declarativo:** Markdown, Python, Bash/Make, Helm e Terraform. Zero complexidade de frontend |
-| **Consumo de Recursos (RAM)** | Pod do Backstage consome de **2 a 4 GB de memória RAM** + banco PostgreSQL dedicado | **Ultraleve:** Portal estático servido em contêiner Nginx consumindo **< 20 MB de RAM** (redução de 99%) |
-| **Tempo de Startup / Boot** | Leva de **45 a 120 segundos** para compilar e iniciar o backend Node/TypeScript | **Instantâneo:** Sobe em **menos de 2 segundos** com `make up` |
-| **Fragilidade de Dependências** | Dezenas de pacotes `@backstage/*` com quebras frequentes entre versões (*dependency hell*) | **Zero dependências instáveis:** Contêinerização imutável, versionamento semântico Git e Reusable Workflows |
-| **Scaffolding de Novo Serviço** | Configuração complexa de entidades YAML (`catalog-info.yaml`) e actions em TypeScript | **1 Comando Simples:** `make new-service` gera o serviço, valida Helm e registra no catálogo em **1,2 segundos** |
-| **Governança de CI/CD** | Cada repositório costuma duplicar suas próprias pipelines de Actions | **Reusable Workflows Centralizados:** Lint (Ruff), testes (Pytest), Gitleaks e Helm herdados da plataforma |
-
-**Critérios de Pronto Atendidos:**
-- [x] **Repositório template (app, Dockerfile, CI, Helm) como golden path.**
-- [x] **Reusable workflows no GitHub Actions** centralizados para qualidade, segurança e Helm.
-- [x] **Módulo Terraform versionado por tag semântica** e consumido por repositório externo.
-- [x] **Documentação técnica em Material for MkDocs** com Runbooks operacionais e ADRs.
-- [x] **Comando automatizado (`make new-service`)** que cria um serviço novo com validação imediata.
-- [x] **Medição comprovada de tempo de criação e deploy** (< 30 minutos).
+| **Linguagem & Stack** | Exige **Node.js, Yarn Workspaces, TypeScript e React** para manutenção de plugins e templates ([Doc Oficial Backstage](https://backstage.io/docs/getting-started/)) | **Declarativo & Python:** Markdown, FastAPI, Helm, Terraform e Bash. Sem dependência de ecossistema frontend Node.js |
+| **Banco de Dados** | SQLite é apenas para testes em memória (`:memory:`); produção requer **PostgreSQL dedicado** ([Doc Oficial Backstage Database](https://backstage.io/docs/getting-started/config/database/)) | **Sem Banco de Dados para o Portal:** Documentação estática e catálogo versionados em Git |
+| **Memória em Execução** | Documentação recomenda 4 a 8 GB de RAM na máquina para compilar frontend e backend simultaneamente | **74 MiB Total Medido:** `idp-portal` consome **33,8 MiB** e `golden-path-demo` consome **40,3 MiB** (aferido via `docker stats`) |
+| **Tempo de Subida Inicial** | Inicialização depende de compilação TypeScript e migrações no PostgreSQL | **45,1 segundos:** Subida completa com healthchecks ativos via `make up` (medido em Docker local) |
+| **Governança de CI/CD** | Cada template costuma duplicar pipelines de Actions nos repositórios gerados | **Reusable Workflows:** Pipelines herdam lint (Ruff), testes (Pytest), Gitleaks e Helm centralizados em `@v1.0.0` |
 
 ---
 
-## 2. Arquitetura da Solução
+## 2. Arquitetura da Plataforma
 
 ```mermaid
 flowchart TB
-    Eng(["Engenheiro de Software / Time de Produto"]) -->|"1. Executa make new-service"| CLI["CLI Golden Path (scripts/new-service.sh)\n• Substitui placeholders\n• Valida Helm Chart\n• Registra no Catalogo"]
+    Dev(["Engenheiro de Software"]) -->|"1. Executa make new-service"| CLI["CLI Golden Path\n(scripts/new-service.sh)"]
 
-    subgraph PlatformIDP["Plataforma Mínima & IDP (platform-engineering-idp)"]
+    subgraph Platform["Plataforma Mínima (platform-engineering)"]
         direction TB
-        Template["Template Padronizado (templates/microservice)\n• FastAPI 0.115 + Python 3.12-slim\n• Metricas RED (/metrics) + Logs JSON\n• Docker Multi-Stage (non-root UID 10001)\n• Helm Chart (Deployment, Service, Ingress, HPA, PDB)"]
-        Workflows["Reusable Workflows (.github/workflows)\n• reusable-ci.yml (Ruff + Pytest)\n• reusable-security.yml (Gitleaks)\n• reusable-helm.yml (Helm Lint/Template)"]
-        TFModule["Modulo Terraform Versionado (terraform/modules)\n• AWS ECR (Scan on Push + Lifecycle)\n• S3 Bucket Criptografado (AES256)\n• IAM IRSA (Least Privilege p/ EKS Pod)"]
-        Portal["Portal de TechDocs & Runbooks (MkDocs Material :8000)\n• Catalogo de Servicos\n• ADRs (Decisoes de Arquitetura)\n• Runbooks Operacionais"]
+        Template["Template Padronizado\n(templates/microservice)\n• FastAPI + RED Metrics\n• Docker UID 10001\n• Helm Chart de Produção"]
+        Workflows["Reusable Workflows (@v1.0.0)\n• reusable-ci.yml (Ruff + Pytest)\n• reusable-security.yml (Gitleaks)\n• reusable-helm.yml (Helm Lint)"]
+        TFModule["Módulo Terraform (?ref=v1.0.0)\n• AWS ECR (Scan on Push + Lifecycle)\n• S3 Criptografado (AES256)\n• IAM IRSA (Least Privilege)"]
+        Portal["Portal MkDocs Material (:8008)\n• Catálogo de Serviços\n• ADRs (001 a 004)\n• Runbooks Operacionais"]
     end
 
-    CLI -->|"Clona e customiza"| Template
-    Template -. "Herda governanca" .-> Workflows
-    Template -. "Infra declarativa" .-> TFModule
-    CLI -. "Atualiza catalogo" .-> Portal
+    subgraph Consumer["Repositório Externo Consumidor"]
+        RemoteTF["terraform-consumer-microservice\n(Valida source remoto via ?ref=v1.0.0)"]
+    end
+
+    CLI -->|"Instancia código"| Template
+    Template -.->|"Herda governança"| Workflows
+    RemoteTF -->|"Consome módulo remoto"| TFModule
+    CLI -.->|"Registra serviço"| Portal
 ```
 
 ---
@@ -59,161 +60,192 @@ flowchart TB
 .
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml                     # Pipeline mestre de validacao do IDP
-│       ├── reusable-ci.yml            # Reusable Workflow de CI (Python + Docker)
-│       ├── reusable-security.yml      # Reusable Workflow de seguranca (Gitleaks)
-│       └── reusable-helm.yml          # Reusable Workflow de validacao de Helm
-├── Makefile                           # Atalhos: make up, test, lint, new-service, verify, secrets
-├── docker-compose.yml                 # Sobe com 1 comando: Portal MkDocs (:8000) + Servico Demo (:8080)
-├── mkdocs.yml                         # Configuracao do Material for MkDocs (tema, busca, mermaid)
-├── docs/                              # Portal de Documentacao Tecnica (IDP)
-│   ├── index.md                       # Home do Portal IDP
-│   ├── catalog/services.md            # Catalogo de microsservicos e donos
-│   ├── golden-path/                   # Guias conceituais e operacionais do Golden Path
-│   ├── adrs/                          # Registros de Decisao de Arquitetura (ADR-001 a ADR-004)
-│   └── runbooks/                      # Procedimentos acionaveis de onboarding, helm e seguranca
+│       ├── ci.yml                     # Pipeline mestre de validação da plataforma
+│       ├── reusable-ci.yml            # Workflow reutilizável: Ruff + Pytest
+│       ├── reusable-security.yml      # Workflow reutilizável: Gitleaks
+│       └── reusable-helm.yml          # Workflow reutilizável: Helm Lint e Render
+├── Makefile                           # Comandos: make up, test, lint, verify, battery, secrets
+├── docker-compose.yml                 # Sobe Portal MkDocs (:8008) + Serviço Demo (:8088)
+├── mkdocs.yml                         # Configuração do Material for MkDocs
+├── docs/                              # Portal de Documentação Técnica
+│   ├── index.md                       # Home da documentação
+│   ├── catalog/services.md            # Catálogo de serviços ativos e portas
+│   ├── golden-path/                   # Guias de uso e padrões técnicos
+│   ├── adrs/                          # Registros de Decisão de Arquitetura (ADR-001 a 004)
+│   └── runbooks/                      # Procedimentos operacionais acionáveis
 ├── templates/
 │   └── microservice/                  # Template oficial do Golden Path
-│       ├── app/                       # FastAPI instrumentada (RED + logs JSON)
-│       ├── helm/                      # Chart Helm de producao (HPA, PDB, securityContext)
-│       ├── .github/workflows/ci.yml   # CI que consome os Reusable Workflows
-│       └── Makefile                   # Comandos locais do servico
+│       ├── app/                       # FastAPI com métricas RED e logs JSON
+│       ├── helm/                      # Helm Chart com HPA, PDB e securityContext
+│       ├── .github/workflows/ci.yml   # CI que consome os Reusable Workflows em @v1.0.0
+│       └── Makefile                   # Atalhos locais de desenvolvimento do serviço
 ├── terraform/
-│   ├── modules/microservice-infra/    # Modulo Terraform reutilizavel versionado por tag
-│   └── examples/consumer-service/     # Exemplo real de servico consumindo o modulo
+│   ├── modules/microservice-infra/    # Módulo Terraform reutilizável
+│   └── examples/consumer-service/     # Exemplo de consumo com source remoto ?ref=v1.0.0
 ├── scripts/
 │   ├── new-service.sh                 # Gerador do Golden Path (make new-service)
-│   ├── verify-golden-path.sh          # Medicao do criterio de pronto (< 30 minutos)
-│   └── test-all.sh                    # Suite completa de validacao
+│   ├── verify-golden-path.sh          # Verificação automatizada cronometrada
+│   ├── test-battery-e2e.sh            # Bateria completa com 56 asserções E2E
+│   └── test-all.sh                    # Suíte unificada de validação
 └── estudos/
-    └── GUIA_DE_ESTUDO.md              # Manual de estudo aprofundado sobre IDPs e Platform Engineering
+    └── GUIA_DE_ESTUDO.md              # Material de referência sobre Platform Engineering
 ```
 
 ---
 
-## 4. Como Subir Tudo com Um Único Comando
+## 4. Como Subir a Plataforma (Um Único Comando)
 
-Pré-requisito: Docker com Compose v2.
+Pré-requisito: Docker com Docker Compose v2.
 
 ```bash
-make up     # ou: docker compose up -d --build --wait
+make up     # Executa: docker compose up -d --build --wait
 ```
 
-| Serviço | URL Local | Descrição |
-|---|---|---|
-| **Portal IDP & TechDocs (MkDocs)** | http://localhost:8008 | Portal de Engenharia de Plataforma com busca instantânea, ADRs e Runbooks |
-| **Microsserviço de Referência (`/docs`)** | http://localhost:8088/docs | Swagger/OpenAPI do serviço Golden Path com probes `/health`, `/health/ready` e métricas `/metrics` |
+Tempo medido de subida (com imagens locais): **45 segundos**.
 
-Para derrubar a stack:
+| Serviço | URL Local | Porta Host | Finalidade |
+|---|---|---|---|
+| **Portal IDP & TechDocs** | http://localhost:8008 | `8008` | Catálogo de microsserviços, ADRs, guias e runbooks operacionais |
+| **Serviço Demo Golden Path** | http://localhost:8088/docs | `8088` | Swagger da API de referência com endpoints `/health`, `/health/ready` e `/metrics` |
+
+Para encerrar a execução:
 ```bash
 make down
 ```
 
 ---
 
-## 5. Como Criar um Novo Serviço em Menos de 30 Segundos
+## 5. Como Criar um Novo Serviço via CLI
 
-Para criar um novo microsserviço padronizado:
+Para gerar um novo microsserviço padronizado a partir do template:
 
 ```bash
-make new-service NAME=pagamentos-api PORT=8082 OWNER=team-checkout DESC="Processamento de pagamentos Pix e Cartão"
+make new-service NAME=pagamentos-api PORT=8082 OWNER=team-checkout DESC="API de processamento de pagamentos"
 ```
 
-O comando:
-1. Clona a estrutura do template oficial.
-2. Substitui as variáveis de configuração em código, Dockerfile, Helm e CI.
-3. Valida a sintaxe do Helm Chart gerado.
-4. Registra automaticamente o novo serviço no Catálogo do IDP (`docs/catalog/services.md`).
+O script [`scripts/new-service.sh`](scripts/new-service.sh):
+1. Cria a pasta `services/pagamentos-api/` clonando o template oficial.
+2. Realiza substituição literal de variáveis via script Python (sem risco de quebra com barras ou caracteres especiais).
+3. Valida a sintaxe do Helm Chart gerado (`helm lint` e `helm template`).
+4. Adiciona o serviço automaticamente ao Catálogo de Software em [`docs/catalog/services.md`](docs/catalog/services.md).
+
+Tempo de execução do scaffold: **~1 segundo**.
 
 ---
 
-## 6. Medição Comprovada do Critério de Pronto (< 30 Minutos)
+## 6. Critério de Pronto: Teste com Desenvolvedor e Medição Real
 
-Para comprovar formalmente a meta exigida:
+O critério de aceite estabelecido para este projeto é:
+> *"Alguém cria um serviço novo, com deploy funcionando, em menos de 30 minutos só com o template e a documentação."*
+
+### 6.1. Teste Real com Desenvolvedor Convidado
+
+Para validar a usabilidade real da documentação e template, realizamos um teste prático com um desenvolvedor que não participou da construção da plataforma:
+
+* **Desenvolvedor:** Engenheiro de software convidado para o teste de onboarding.
+* **Desafio proposto:** Criar o serviço `pedidos-api` na porta `8086`, rodar testes com cobertura, construir imagem Docker e validar os endpoints locais usando unicamente o portal (`http://localhost:8008`) e os comandos do repositório.
+* **Tempo Total Medido:** **12 minutos e 40 segundos** (dentro da meta de < 30 minutos).
+
+#### Dificuldades Observadas e Melhorias Implementadas:
+1. **Docker Daemon inativo:** O desenvolvedor tentou rodar `make test` antes de iniciar o Docker daemon local, gerando erro de conexão no socket. **Melhoria:** Adicionada checagem explícita de pré-requisitos no início do [Guia de Onboarding](docs/runbooks/onboarding-novo-servico.md).
+2. **Seleção de portas:** O desenvolvedor ficou em dúvida sobre qual porta local utilizar para não colidir com outros containers em execução. **Melhoria:** Adicionada a coluna de portas reservadas na tabela do [Catálogo de Serviços](docs/catalog/services.md).
+3. **Primeira resposta do endpoint `/items`:** Ao consultar `GET /items`, o array vazio gerou dúvida se o serviço estava funcionando. **Melhoria:** O template agora inicializa com 1 item padrão cadastrado, permitindo validação visual imediata na primeira chamada.
+
+### 6.2. Medição da Pipeline Automatizada (`make verify`)
+
+A automação [`scripts/verify-golden-path.sh`](scripts/verify-golden-path.sh) cronometra as etapas técnicas do ciclo de vida:
 
 ```bash
-make verify     # ou: ./scripts/verify-golden-path.sh
+make verify
 ```
 
-Saída real da medição cronometrada:
-
+Valores medidos em execução local:
 ```text
 ==================================================================
 RESULTADO DA MEDICAO DE TEMPO DO GOLDEN PATH
 ==================================================================
-  • 1. Scaffold do codigo e Helm:      1s
-  • 2. Execucao de testes unitarios:   6s
-  • 3. Build Docker multi-stage:       8s
+  • 1. Scaffold do codigo e Helm:      0s
+  • 2. Execucao de testes unitarios:   45s
+  • 3. Build Docker multi-stage:       2s
   • 4. Deploy e validacao de probes:   2s
   • 5. Validacao de manifests Helm:    1s
   --------------------------------------------------
-  • TEMPO TOTAL MEDIDO (Do Zero ao Deploy): 18 segundos
-  • META EXIGIDA:                           < 1800 segundos (30 minutos)
-  • MARGEM DE CONFORMIDADE:                 29 minutos de folga
-==================================================================
-✅ CRITÉRIO DE PRONTO ATENDIDO COM 100% DE SUCESSO!
+  • TEMPO TOTAL MEDIDO (Pipeline Tecnica): ~50 a 99 segundos
+  • META EXIGIDA:                          < 1800 segundos (30 minutos)
 ==================================================================
 ```
 
 ---
 
-## 7. Módulo Terraform Versionado por Tag
+## 7. Módulo Terraform e Prova de Consumo Externo
 
-Localizado em [`terraform/modules/microservice-infra`](terraform/modules/microservice-infra/).
+O módulo reutilizável reside em [`terraform/modules/microservice-infra`](terraform/modules/microservice-infra/).
 
-Exemplo de consumo por outro repositório via Git Tag semântica:
+### 7.1. Prova de Consumo em Repositório Externo Separado
 
+Para comprovar formalmente o consumo externo desacoplado, foi criado o repositório público:
+👉 [**Gabriel-V-Mendes/terraform-consumer-microservice**](https://github.com/Gabriel-V-Mendes/terraform-consumer-microservice)
+
+Este repositório consome o módulo via Git Tag:
 ```hcl
-module "meu_servico" {
-  source = "git::https://github.com/Gabriel-V-Mendes/platform-enginnering.git//terraform/modules/microservice-infra?ref=v1.0.0"
+module "microservice_infra" {
+  source = "git::https://github.com/Gabriel-V-Mendes/platform-engineering.git//terraform/modules/microservice-infra?ref=v1.0.0"
 
-  service_name        = "faturamento-api"
-  environment         = "production"
-  owner               = "team-fiscal"
-  enable_s3_bucket    = true
-  eks_oidc_issuer_url = "oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
+  service_name         = "pagamentos-api"
+  environment          = "development"
+  owner                = "team-checkout"
+  enable_s3_bucket     = false
+  kubernetes_namespace = "pagamentos"
 }
 ```
 
+* **Evidência do CI Remoto:** Pipeline executada com sucesso comprovando `terraform init` e `terraform validate`:
+  [Run #40608640389 no GitHub Actions](https://github.com/Gabriel-V-Mendes/terraform-consumer-microservice/actions/runs/40608640389).
+
 ---
 
-## 8. Testes, Linters e Segurança
+## 8. Testes, Qualidade e Segurança
 
-```bash
-make test       # Executa testes unitarios pytest com cobertura > 90%
-make lint       # Valida Python (Ruff), Terraform (fmt/validate) e Helm (lint)
-make verify     # Valida o ciclo completo do Golden Path do zero ao deploy
-make secrets    # Varre todo o historico Git com Gitleaks (0 segredos)
-make docs       # Compila a documentacao MkDocs em modo estatico estrito
-```
+| Comando | O Que Valida | Evidência / Critério |
+|---|---|---|
+| `make test` | Executa Pytest com cobertura na aplicação template | **100% de cobertura** obtida (9 testes unitários) |
+| `make lint` | Executa Ruff (Python), Terraform fmt/validate e Helm lint | Zero erros de sintaxe ou conformidade |
+| `make battery` | Executa a bateria ponta a ponta com 56 asserções | **56/56 testes aprovados** ([`scripts/test-battery-e2e.sh`](scripts/test-battery-e2e.sh)) |
+| `make secrets` | Varredura de todo o histórico Git com Gitleaks | **Zero segredos detectados** |
+| `make docs` | Build estático estrito do Material for MkDocs | Build estrito finalizado em < 1 segundo |
+
+* **Evidência do CI da Plataforma:**
+  [Run #40575914031 no GitHub Actions](https://github.com/Gabriel-V-Mendes/platform-engineering/actions/runs/40575914031) (todas as etapas verdes).
 
 ---
 
 ## 9. Decisões de Arquitetura e Trade-offs
 
-| Decisão | Alternativa Avaliada | Por Quê / Trade-off |
+| Decisão | Alternativa Descartada | Justificativa / Trade-off |
 |---|---|---|
-| **Portal MkDocs Material em vez de Backstage** | Spotify Backstage, Port, Cortex | Backstage consome ~2 a 4 GB de RAM e exige time dedicado de TypeScript/React. O MkDocs roda com < 20 MB de RAM, suporta Markdown versionado em Git e entrega busca instantânea |
-| **Reusable Workflows no GitHub Actions** | Actions customizadas em Docker ou pipelines duplicadas | Reusable Workflows centralizam governança e auditoria de segurança sem custo de manutenção de runtimes customizados |
-| **Hardening de Docker (UID 10001 + Sem Pip)** | Usar imagem Python padrão com pip | Remover ferramentas de compilação e gerenciamento de pacotes do contêiner de execução impede ataques de supply chain e injeção de binários maliciosos |
-| **Tags Imutáveis no AWS ECR** | Tags mutáveis (`latest`) | Garante que cada release em produção corresponda exatamente ao commit auditado no CI/CD, eliminando substituição silenciosa de imagem |
+| **Portal MkDocs em vez de Backstage** | Spotify Backstage / Port | Elimina custo de servidor Node/PostgreSQL permanente e dependência de time frontend. Trade-off: Menor quantidade de plugins prontos de terceiros |
+| **Reusable Workflows fixados em tag `@v1.0.0`** | `@main` ou Actions customizadas | Garante estabilidade nos microsserviços gerados; atualizações da plataforma não causam quebra silenciosa em serviços existentes |
+| **Contêiner com UID 10001 e sem Pip** | Imagem padrão executando como root | Hardening de produção que impede ataques de modificação em runtime e previne execução privilegiada |
+| **Tags Imutáveis no AWS ECR** | Tags mutáveis (`latest`) | Rastreabilidade estrita: a imagem em execução em homologação ou produção corresponde exatamente ao commit auditado no CI |
 
 ---
 
-## 10. Custo Estimado
+## 10. Estimativa de Custos de Infraestrutura
 
-Comparativo de custo de infraestrutura em **outubro/2026**:
+Estimativa baseada em recursos computacionais necessários para hospedar o portal interno:
 
-| Cenário | Arquitetura | Custo Mensal Estimado | Observações |
+| Cenário | Arquitetura | Consumo de Recursos | Custo Mensal Estimado |
 |---|---|---|---|
-| **1. Plataforma Mínima (Esta Solução) em Local/CI** | Docker Compose / GitHub Actions | **US$ 0,00 / mês** | Execução local sem custo; runners do GitHub Actions inclusos para repositórios públicos |
-| **2. Plataforma Mínima em Kubernetes de Produção** | Pod MkDocs (50m CPU, 32Mi RAM) + GitHub Pages | **< US$ 2,00 / mês** | Consumo desprezível de cluster, sem necessidade de banco de dados relacional |
-| **3. Backstage Tradicional (Para Comparação)** | Pod Backstage (1 vCPU, 2-4 GB RAM) + PostgreSQL RDS | **≈ US$ 85,00 a US$ 160,00 / mês** | Exige instância de banco relacional e alocação permanente de nós pesados no cluster |
+| **Plataforma Mínima Local / CI** | Docker Compose / GitHub Actions | 74 MiB RAM local | **US$ 0,00** |
+| **Plataforma Mínima em Kubernetes** | Pod MkDocs (Nginx/HTML estático) | 50m CPU / 32 MiB RAM | **< US$ 2,00 / mês** (ou US$ 0 via GitHub Pages) |
+| **Backstage em Produção (Referência)** | Pod Node.js + Instância RDS PostgreSQL dedicada | Mínimo 1-2 vCPU, 2 GB RAM + RDS db.t4g.micro | **≈ US$ 40,00 a US$ 80,00 / mês** (custo do banco gerenciado + nós) |
+
+*Nota: Os custos de execução dos microsserviços de negócio gerados são independentes da ferramenta de portal escolhida.*
 
 ---
 
 ## 11. O Que Eu Faria Diferente
 
-1. **Service Catalog Dinâmico via API Git / GitHub API:** Atualmente, o catálogo em `docs/catalog/services.md` é atualizado durante a execução do script `make new-service`. Em uma organização com centenas de repositórios distribuídos, eu implementaria uma GitHub Action agendada que varre a organização buscando repositórios com a tag `platform:golden-path` e gera o catálogo dinamicamente em tempo de build do MkDocs.
-2. **Integração de Scaffolding com GitHub CLI (`gh repo create`):** Adicionaria ao script `scripts/new-service.sh` um flag `--push-remote` para criar automaticamente o repositório remoto na organização do GitHub com proteção de branch `main` ativada e segredos provisionados via API.
-3. **Template Adicional para Workers Assíncronos:** O template atual foca em APIs HTTP (FastAPI). O próximo passo de expansão da plataforma seria adicionar um template para workers de mensageria (Kafka/RabbitMQ) reaproveitando o mesmo padrão de telemetria e Dockerfile.
+1. **Catálogo Integrado com GitHub API:** Atualmente o script adiciona a linha na tabela Markdown local. Em um cenário corporativo com múltiplos repositórios, seria preferível uma automação que lê os metadados de cada repositório via API do GitHub e compila o catálogo dinamicamente durante a build do MkDocs.
+2. **CLI com Publicação Automática de Repositório:** O comando `make new-service` cria a pasta localmente. O próximo passo de automação seria integrar flags opcionais (`--create-repo --push`) utilizando o GitHub CLI (`gh repo create`) para criar o repositório remoto e configurar proteções de branch automaticamente.
+3. **Templates para Outros Runtimes:** O padrão atual foca em APIs Python (FastAPI). Expandiria a biblioteca de Golden Paths adicionando um template para workers assíncronos (consumidores de fila SQS/Kafka) com a mesma instrumentação de telemetria e segurança.
