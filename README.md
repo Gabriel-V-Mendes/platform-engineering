@@ -113,6 +113,12 @@ Para encerrar a execução:
 make down
 ```
 
+### Evidências Visuais da Plataforma em Execução (Portal IDP & Serviço Demo)
+
+![Portal IDP & TechDocs (MkDocs Material na porta 8008)](docs/assets/screenshots/idp-portal.png)
+
+![Swagger UI do Microsserviço Demo Golden Path (FastAPI na porta 8088)](docs/assets/screenshots/golden-path-swagger.png)
+
 ---
 
 ## 5. Como Criar um Novo Serviço via CLI
@@ -249,3 +255,16 @@ Estimativa baseada em recursos computacionais necessários para hospedar o porta
 1. **Catálogo Integrado com GitHub API:** Atualmente o script adiciona a linha na tabela Markdown local. Em um cenário corporativo com múltiplos repositórios, seria preferível uma automação que lê os metadados de cada repositório via API do GitHub e compila o catálogo dinamicamente durante a build do MkDocs.
 2. **CLI com Publicação Automática de Repositório:** O comando `make new-service` cria a pasta localmente. O próximo passo de automação seria integrar flags opcionais (`--create-repo --push`) utilizando o GitHub CLI (`gh repo create`) para criar o repositório remoto e configurar proteções de branch automaticamente.
 3. **Templates para Outros Runtimes:** O padrão atual foca em APIs Python (FastAPI). Expandiria a biblioteca de Golden Paths adicionando um template para workers assíncronos (consumidores de fila SQS/Kafka) com a mesma instrumentação de telemetria e segurança.
+
+---
+
+## 12. Série Completa do Portfólio DevOps & SRE (5 Projetos Conectados)
+
+| # | Projeto | Repositório Oficial | CI Status |
+|:---:|---|---|---|
+| **1** | **Containerização & Pipeline CI/CD (DevSecOps)** | [`Gabriel-V-Mendes/Containeriza-oPipelineCICD`](https://github.com/Gabriel-V-Mendes/Containeriza-oPipelineCICD) | [![CI/CD](https://github.com/Gabriel-V-Mendes/Containeriza-oPipelineCICD/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Gabriel-V-Mendes/Containeriza-oPipelineCICD/actions/workflows/ci.yml) |
+| **2** | **Infraestrutura AWS com OpenTofu & Floci (FinOps + OIDC)** | [`Gabriel-V-Mendes/infraestrutura-aws-terraform-localstack`](https://github.com/Gabriel-V-Mendes/infraestrutura-aws-terraform-localstack) | [![Infra CI/CD](https://github.com/Gabriel-V-Mendes/infraestrutura-aws-terraform-localstack/actions/workflows/infra-ci.yml/badge.svg?branch=main)](https://github.com/Gabriel-V-Mendes/infraestrutura-aws-terraform-localstack/actions/workflows/infra-ci.yml) |
+| **3** | **GitOps & Kubernetes (ArgoCD + Helm + Gateway API + SOPS/ESO)** | [`Gabriel-V-Mendes/GitOps_Kubernets`](https://github.com/Gabriel-V-Mendes/GitOps_Kubernets) | [![Validate Manifests & Security](https://github.com/Gabriel-V-Mendes/GitOps_Kubernets/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Gabriel-V-Mendes/GitOps_Kubernets/actions/workflows/ci.yml) |
+| **4** | **Observabilidade & SRE (Prometheus + Grafana Alloy + Loki + Alertmanager)** | [`Gabriel-V-Mendes/Observabilidade`](https://github.com/Gabriel-V-Mendes/Observabilidade) | [![Observability & SLO CI](https://github.com/Gabriel-V-Mendes/Observabilidade/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Gabriel-V-Mendes/Observabilidade/actions/workflows/ci.yml) |
+| **5** | **Platform Engineering & Golden Path (IDP + Reusable Workflows + TF Modules)** *(este repo)* | [`Gabriel-V-Mendes/platform-engineering`](https://github.com/Gabriel-V-Mendes/platform-engineering) | [![Platform & IDP CI](https://github.com/Gabriel-V-Mendes/platform-engineering/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Gabriel-V-Mendes/platform-engineering/actions/workflows/ci.yml) |
+

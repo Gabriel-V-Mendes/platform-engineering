@@ -14,12 +14,12 @@ Antes desta decisão, cada repositório mantinha sua própria cópia de pipeline
 
 ## 2. Decisão
 
-Centralizar toda a inteligência e validação de CI/CD nos **Reusable Workflows** do repositório da plataforma (`platform-engineering-idp`):
+Centralizar toda a inteligência e validação de CI/CD nos **Reusable Workflows** do repositório da plataforma (`Gabriel-V-Mendes/platform-engineering`):
 - `reusable-ci.yml`: Execução de Ruff, Pytest com cobertura mínima de 90% e build da imagem Docker.
 - `reusable-security.yml`: Varredura de segredos no histórico Git com Gitleaks.
 - `reusable-helm.yml`: Validação e renderização com Helm Lint e Template.
 
-Os repositórios individuais apenas chamam esses fluxos com `uses: org/platform-engineering-idp/.github/workflows/reusable-ci.yml@v1.0.0`.
+Os repositórios individuais apenas chamam esses fluxos com `uses: Gabriel-V-Mendes/platform-engineering/.github/workflows/reusable-ci.yml@v1.0.0`.
 
 ---
 
