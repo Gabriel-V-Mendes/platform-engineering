@@ -19,7 +19,7 @@ Todos os módulos de infraestrutura de microsserviço (`terraform/modules/micros
 2. Ser consumidos pelos repositórios dos serviços através do parâmetro `?ref=vX.Y.Z`:
    ```hcl
    module "servico_infra" {
-     source = "git::https://github.com/org/platform-engineering-idp.git//terraform/modules/microservice-infra?ref=v1.0.0"
+     source = "git::https://github.com/Gabriel-V-Mendes/platform-engineering.git//terraform/modules/microservice-infra?ref=v1.0.0"
      ...
    }
    ```
